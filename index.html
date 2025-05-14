@@ -1,121 +1,399 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Loading Dock Replacement Survey</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f7f7f7; margin: 0; padding: 20px; }
-    h1 { text-align: center; color: #2E86AB; }
-    form { max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    .section { margin-bottom: 30px; }
-    .section h2 { margin-bottom: 10px; font-size: 20px; color: #333; }
-    label { display: block; margin-bottom: 5px; font-weight: bold; }
-    select, input[type=text], input[type=date], textarea { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; margin-bottom: 10px; box-sizing: border-box; }
-    .field-group { border: 1px solid #ddd; padding: 15px; border-radius: 4px; margin-bottom: 10px; background: #fafafa; }
-    .photo-preview { max-width: 100%; max-height: 200px; margin-top: 5px; border: 1px solid #ddd; border-radius: 4px; }
-    button { width: 100%; padding: 12px; background: #2E86AB; border: none; color: #fff; font-size: 16px; border-radius: 4px; cursor: pointer; }
-    button:hover { background: #235f75; }
-  </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Loading Dock Replacement Survey</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f7f7f7; margin:0; padding:20px;}
+  h1 { text-align:center; color:#2E86AB; }
+  form { max-width:800px; margin:auto; background:#fff; padding:20px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.1);}
+  .section { margin-bottom:30px; }
+  .section h2 { margin-bottom:10px; font-size:20px; color:#333; }
+  label { display:block; margin-bottom:5px; font-weight:bold; }
+  select, input[type=text], input[type=date], textarea { width:100%; padding:8px; border:1px solid #ccc; border-radius:4px; margin-bottom:10px; box-sizing:border-box;}
+  .field-group { border:1px solid #ddd; padding:15px; border-radius:4px; margin-bottom:10px; background:#fafafa;}
+  video, .photo-preview { width:100%; max-height:200px; border:1px solid #ddd; border-radius:4px; margin-bottom:5px;}
+  button.capture { padding:8px; margin-bottom:10px; background:#2E86AB; color:#fff; border:none; border-radius:4px; cursor:pointer;}
+  button.capture:hover { background:#235f75;}
+  button.generate { width:100%; padding:12px; background:#2E86AB; border:none; color:#fff; font-size:16px; border-radius:4px; cursor:pointer;}
+  button.generate:hover { background:#235f75;}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-  <h1>Loading Dock Replacement Survey</h1>
-  <form id="surveyForm">
-    <!-- 1. Site & General Information -->
-    <div class="section"><h2>1. Site & General Information</h2>
-      <div class="field-group">
-        <label>Store ID / Address / Contact</label><input type="text" name="storeInfo" required>
-        <label>Date of Survey</label><input type="date" name="surveyDate" required>
-        <label>Inspector Name</label><input type="text" name="inspectorName">
-        <label>Photo</label><input type="file" name="sitePhoto" accept="image/*" capture="environment"><img class="photo-preview" id="sitePhotoPreview">
-      </div>
+<h1>Loading Dock Replacement Survey</h1>
+<form id="surveyForm">
+
+  <!-- 1. Site & General Information -->
+  <div class="section">
+    <h2>1. Site & General Information</h2>
+    <div class="field-group">
+      <label>Store ID / Address / Contact</label>
+      <input type="text" name="storeInfo" required>
+      <label>Date of Survey</label>
+      <input type="date" name="surveyDate" required>
+      <label>Inspector Name</label>
+      <input type="text" name="inspectorName">
+      <label>Site Photo</label>
+      <video id="siteVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="site">Capture</button>
+      <canvas id="siteCanvas" style="display:none;"></canvas>
+      <img id="sitePreview" class="photo-preview">
+      <input type="hidden" name="siteData" id="siteData">
     </div>
-    <!-- 2. Dimensions & Clearances -->
-    <div class="section"><h2>2. Dimensions & Clearances</h2>
-      <div class="field-group"><label>Dock opening width & height</label><input type="text" name="opening"><label>Photo</label><input type="file" name="openingPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="openingPhotoPreview"></div>
-      <div class="field-group"><label>Dock pit depth & height</label><input type="text" name="pitDepth"><label>Photo</label><input type="file" name="pitPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="pitPhotoPreview"></div>
-      <div class="field-group"><label>Leveler approach slope</label><input type="text" name="slope"><label>Photo</label><input type="file" name="slopePhoto" accept="image/*" capture="environment"><img class="photo-preview" id="slopePhotoPreview"></div>
+  </div>
+
+  <!-- 2. Dimensions & Clearances -->
+  <div class="section">
+    <h2>2. Dimensions & Clearances</h2>
+    <div class="field-group">
+      <label>Dock opening width & height</label>
+      <input type="text" name="opening">
+      <label>Photo</label>
+      <video id="openingVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="opening">Capture</button>
+      <canvas id="openingCanvas" style="display:none;"></canvas>
+      <img id="openingPreview" class="photo-preview">
+      <input type="hidden" name="openingData" id="openingData">
     </div>
-    <!-- 3. Structural & Civil Conditions -->
-    <div class="section"><h2>3. Structural & Civil Conditions</h2>
-      <div class="field-group"><label>Concrete pit condition</label><select name="concreteCondition"><option>Good</option><option>Fair</option><option>Poor</option></select><label>Comments</label><textarea name="concreteComments" rows="2"></textarea><label>Photo</label><input type="file" name="concretePhoto" accept="image/*" capture="environment"><img class="photo-preview" id="concretePhotoPreview"></div>
-      <div class="field-group"><label>Steel embedment plates condition</label><select name="steelEmbed"><option>Good</option><option>Fair</option><option>Poor</option></select><label>Photo</label><input type="file" name="steelEmbedPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="steelEmbedPhotoPreview"></div>
-      <div class="field-group"><label>Pavement approach condition</label><select name="pavement"><option>Good</option><option>Fair</option><option>Poor</option></select><label>Photo</label><input type="file" name="pavementPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="pavementPhotoPreview"></div>
+    <div class="field-group">
+      <label>Dock pit depth & height</label>
+      <input type="text" name="pitDepth">
+      <label>Photo</label>
+      <video id="pitVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="pit">Capture</button>
+      <canvas id="pitCanvas" style="display:none;"></canvas>
+      <img id="pitPreview" class="photo-preview">
+      <input type="hidden" name="pitData" id="pitData">
     </div>
-    <!-- 4. Dock Equipment Condition -->
-    <div class="section"><h2>4. Dock Equipment Condition</h2>
-      <div class="field-group"><label>Leveler type & capacity</label><input type="text" name="levelerType"><label>Comments</label><textarea name="levelerComments" rows="2"></textarea><label>Photo</label><input type="file" name="levelerPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="levelerPhotoPreview"></div>
-      <div class="field-group"><label>Bumpers (number, size, material, remaining thickness)</label><input type="text" name="bumpers"><label>Photo</label><input type="file" name="bumpersPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="bumpersPhotoPreview"></div>
-      <div class="field-group"><label>Seals / Shelters condition</label><select name="seals"><option>Good</option><option>Fair</option><option>Poor</option></select><label>Photo</label><input type="file" name="sealsPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="sealsPhotoPreview"></div>
-      <div class="field-group"><label>Overhead doors condition</label><select name="doors"><option>Good</option><option>Fair</option><option>Poor</option></select><label>Photo</label><input type="file" name="doorsPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="doorsPhotoPreview"></div>
+    <div class="field-group">
+      <label>Leveler approach slope</label>
+      <input type="text" name="slope">
+      <label>Photo</label>
+      <video id="slopeVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="slope">Capture</button>
+      <canvas id="slopeCanvas" style="display:none;"></canvas>
+      <img id="slopePreview" class="photo-preview">
+      <input type="hidden" name="slopeData" id="slopeData">
     </div>
-    <!-- 5. Safety & Code Compliance -->
-    <div class="section"><h2>5. Safety & Code Compliance</h2>
-      <div class="field-group"><label>Wheel restraints / systems</label><select name="restraints"><option>Present</option><option>Not Present</option></select><label>Photo</label><input type="file" name="restraintsPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="restraintsPhotoPreview"></div>
-      <div class="field-group"><label>Dock lights & communication</label><select name="dockLights"><option>Good</option><option>Fair</option><option>Poor</option></select><label>Photo</label><input type="file" name="dockLightsPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="dockLightsPhotoPreview"></div>
-      <div class="field-group"><label>Signage & markings</label><select name="signage"><option>Good</option><option>Fair</option><option>Poor</option></select><label>Photo</label><input type="file" name="signagePhoto" accept="image/*" capture="environment"><img class="photo-preview" id="signagePhotoPreview"></div>
-      <div class="field-group"><label>Fall protection (railings, guardrails)</label><select name="fallProtection"><option>Good</option><option>Fair</option><option>Poor</option></select><label>Photo</label><input type="file" name="fallProtectionPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="fallProtectionPhotoPreview"></div>
-      <div class="field-group"><label>Fire & egress proximity</label><input type="text" name="fireEgress"><label>Photo</label><input type="file" name="fireEgressPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="fireEgressPhotoPreview"></div>
+  </div>
+
+  <!-- 3. Structural & Civil Conditions -->
+  <div class="section">
+    <h2>3. Structural & Civil Conditions</h2>
+    <div class="field-group">
+      <label>Concrete pit condition</label>
+      <select name="concreteCondition"><option>Good</option><option>Fair</option><option>Poor</option></select>
+      <label>Comments</label>
+      <textarea name="concreteComments" rows="2"></textarea>
+      <label>Photo</label>
+      <video id="concreteVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="concrete">Capture</button>
+      <canvas id="concreteCanvas" style="display:none;"></canvas>
+      <img id="concretePreview" class="photo-preview">
+      <input type="hidden" name="concreteData" id="concreteData">
     </div>
-    <!-- 6. Electrical & Lighting -->
-    <div class="section"><h2>6. Electrical & Lighting</h2>
-      <div class="field-group"><label>Power availability for levelers & doors</label><select name="powerAvailability"><option>Available</option><option>Not Available</option></select><label>Photo</label><input type="file" name="powerPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="powerPhotoPreview"></div>
-      <div class="field-group"><label>Lighting levels inside pit & approach</label><input type="text" name="lightingLevels"><label>Photo</label><input type="file" name="lightingPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="lightingPhotoPreview"></div>
+    <div class="field-group">
+      <label>Steel embedment plates condition</label>
+      <select name="steelEmbed"><option>Good</option><option>Fair</option><option>Poor</option></select>
+      <label>Photo</label>
+      <video id="steelVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="steel">Capture</button>
+      <canvas id="steelCanvas" style="display:none;"></canvas>
+      <img id="steelPreview" class="photo-preview">
+      <input type="hidden" name="steelData" id="steelData">
     </div>
-    <!-- 7. Usage & Maintenance History -->
-    <div class="section"><h2>7. Usage & Maintenance History</h2><div class="field-group"><label>Daily throughput (calls/day/week)</label><input type="text" name="throughput"></div></div>
-    <!-- 8. Environmental & Site Constraints -->
-    <div class="section"><h2>8. Environmental & Site Constraints</h2><div class="field-group"><label>Exposure (winds/rain zones)</label><input type="text" name="exposure"></div><div class="field-group"><label>Freezing/drainage issues</label><input type="text" name="freezeDrain"></div><div class="field-group"><label>Nearby obstructions</label><input type="text" name="obstructions"></div></div>
-    <!-- 9. Utilities & Accessories -->
-    <div class="section"><h2>9. Utilities & Accessories</h2><div class="field-group"><label>Dock plates/boards</label><input type="text" name="dockPlates"><label>Photo</label><input type="file" name="dockPlatesPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="dockPlatesPhotoPreview"></div><div class="field-group"><label>Scissor/dock lifts</label><input type="text" name="scissorLifts"><label>Photo</label><input type="file" name="scissorLiftsPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="scissorLiftsPhotoPreview"></div><div class="field-group"><label>Air lines/outlets</label><input type="text" name="airLines"><label>Photo</label><input type="file" name="airLinesPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="airLinesPhotoPreview"></div><div class="field-group"><label>Trailer restraint lights</label><input type="text" name="restraintLights"><label>Photo</label><input type="file" name="restraintLightsPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="restraintLightsPhotoPreview"></div></div>
-    <!-- 10. Notes & Recommendations -->
-    <div class="section"><h2>10. Notes & Recommendations</h2><div class="field-group"><label>Additional observations/anomalies</label><textarea name="notes" rows="3"></textarea><label>Prelim. Repair vs Replace</label><textarea name="recommendations" rows="2"></textarea><label>Photo</label><input type="file" name="notesPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="notesPhotoPreview"></div></div>
-    <!-- 11. Additional Notes & Add-Ons -->
-    <div class="section"><h2>11. Additional Notes & Add-Ons</h2><div class="field-group"><textarea name="extraNotes" rows="4" placeholder="Enter any additional comments or observations"></textarea><label>Photo</label><input type="file" name="extraNotesPhoto" accept="image/*" capture="environment"><img class="photo-preview" id="extraNotesPhotoPreview"></div></div>
-    <button type="button" id="generatePdf">Generate PDF</button>
-  </form>
-  <script>
-    document.querySelectorAll('input[type=file]').forEach(input => {
-      input.addEventListener('change', event => {
-        const preview = document.getElementById(event.target.name + 'Preview');
-        const file = event.target.files[0];
-        if (file && preview) {
-          const reader = new FileReader();
-          reader.onload = e => preview.src = e.target.result;
-          reader.readAsDataURL(file);
-        }
-      });
+    <div class="field-group">
+      <label>Pavement approach condition</label>
+      <select name="pavement"><option>Good</option><option>Fair</option><option>Poor</option></select>
+      <label>Photo</label>
+      <video id="pavementVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="pavement">Capture</button>
+      <canvas id="pavementCanvas" style="display:none;"></canvas>
+      <img id="pavementPreview" class="photo-preview">
+      <input type="hidden" name="pavementData" id="pavementData">
+    </div>
+  </div>
+
+  <!-- 4. Dock Equipment Condition -->
+  <div class="section">
+    <h2>4. Dock Equipment Condition</h2>
+    <div class="field-group">
+      <label>Leveler type & capacity</label><input type="text" name="levelerType">
+      <label>Comments</label><textarea name="levelerComments" rows="2"></textarea>
+      <label>Photo</label>
+      <video id="levelerVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="leveler">Capture</button>
+      <canvas id="levelerCanvas" style="display:none;"></canvas>
+      <img id="levelerPreview" class="photo-preview">
+      <input type="hidden" name="levelerData" id="levelerData">
+    </div>
+    <div class="field-group">
+      <label>Bumpers condition</label><input type="text" name="bumpers">
+      <label>Photo</label>
+      <video id="bumpersVideo" autoplay playsinline></video>  
+      <button type="button" class="capture" data-target="bumpers">Capture</button>
+      <canvas id="bumpersCanvas" style="display:none;"></canvas>
+      <img id="bumpersPreview" class="photo-preview">
+      <input type="hidden" name="bumpersData" id="bumpersData">
+    </div>
+    <div class="field-group">
+      <label>Seals / Shelters condition</label>
+      <select name="seals"><option>Good</option><option>Fair</option><option>Poor</option></select>
+      <label>Photo</label>
+      <video id="sealsVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="seals">Capture</button>
+      <canvas id="sealsCanvas" style="display:none;"></canvas>
+      <img id="sealsPreview" class="photo-preview">
+      <input type="hidden" name="sealsData" id="sealsData">
+    </div>
+    <div class="field-group">
+      <label>Overhead doors condition</label>
+      <select name="doors"><option>Good</option><option>Fair</option><option>Poor</option></select>
+      <label>Photo</label>
+      <video id="doorsVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="doors">Capture</button>
+      <canvas id="doorsCanvas" style="display:none;"></canvas>
+      <img id="doorsPreview" class="photo-preview">
+      <input type="hidden" name="doorsData" id="doorsData">
+    </div>
+  </div>
+
+  <!-- 5. Safety & Code Compliance -->
+  <div class="section">
+    <h2>5. Safety & Code Compliance</h2>
+    <div class="field-group">
+      <label>Wheel restraints / systems</label>
+      <select name="restraints"><option>Present</option><option>Not Present</option></select>
+      <label>Photo</label>
+      <video id="restraintsVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="restraints">Capture</button>
+      <canvas id="restraintsCanvas" style="display:none;"></canvas>
+      <img id="restraintsPreview" class="photo-preview">
+      <input type="hidden" name="restraintsData" id="restraintsData">
+    </div>
+    <div class="field-group">
+      <label>Dock lights & communication</label>
+      <select name="dockLights"><option>Good</option><option>Fair</option><option>Poor</option></select>
+      <label>Photo</label>
+      <video id="dockLightsVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="dockLights">Capture</button>
+      <canvas id="dockLightsCanvas" style="display:none;"></canvas>
+      <img id="dockLightsPreview" class="photo-preview">
+      <input type="hidden" name="dockLightsData" id="dockLightsData">
+    </div>
+    <div class="field-group">
+      <label>Signage & markings</label>
+      <select name="signage"><option>Good</option><option>Fair</option><option>Poor</option></select>
+      <label>Photo</label>
+      <video id="signageVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="signage">Capture</button>  
+      <canvas id="signageCanvas" style="display:none;"></canvas>
+      <img id="signagePreview" class="photo-preview">
+      <input type="hidden" name="signageData" id="signageData">
+    </div>
+    <div class="field-group">
+      <label>Fall protection (railings, guardrails)</label>
+      <select name="fallProtection"><option>Good</option><option>Fair</option><option>Poor</option></select>
+      <label>Photo</label>
+      <video id="fallProtectionVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="fallProtection">Capture</button>
+      <canvas id="fallProtectionCanvas" style="display:none;"></canvas>
+      <img id="fallProtectionPreview" class="photo-preview">
+      <input type="hidden" name="fallProtectionData" id="fallProtectionData">
+    </div>
+    <div class="field-group">
+      <label>Fire & egress proximity</label>
+      <input type="text" name="fireEgress">
+      <label>Photo</label>
+      <video id="fireEgressVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="fireEgress">Capture</button>
+      <canvas id="fireEgressCanvas" style="display:none;"></canvas>
+      <img id="fireEgressPreview" class="photo-preview">
+      <input type="hidden" name="fireEgressData" id="fireEgressData">
+    </div>
+  </div>
+
+  <!-- 6. Electrical & Lighting -->
+  <div class="section">
+    <h2>6. Electrical & Lighting</h2>
+    <div class="field-group">
+      <label>Power availability for levelers & doors</label>
+      <select name="powerAvailability"><option>Available</option><option>Not Available</option></select>
+      <label>Photo</label>
+      <video id="powerVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="power">Capture</button>
+      <canvas id="powerCanvas" style="display:none;"></canvas>
+      <img id="powerPreview" class="photo-preview">
+      <input type="hidden" name="powerData" id="powerData">
+    </div>
+    <div class="field-group">
+      <label>Lighting levels inside pit & approach</label>
+      <input type="text" name="lightingLevels">
+      <label>Photo</label>
+      <video id="lightingVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="lighting">Capture</button>
+      <canvas id="lightingCanvas" style="display:none;"></canvas>
+      <img id="lightingPreview" class="photo-preview">
+      <input type="hidden" name="lightingData" id="lightingData">
+    </div>
+  </div>
+
+  <!-- 7. Usage & Maintenance History -->  
+  <div class="section">
+    <h2>7. Usage & Maintenance History</h2>
+    <div class="field-group">
+      <label>Daily throughput (calls/day/week)</label>
+      <input type="text" name="throughput">
+    </div>
+  </div>
+
+  <!-- 8. Environmental & Site Constraints -->
+  <div class="section">
+    <h2>8. Environmental & Site Constraints</h2>
+    <div class="field-group">
+      <label>Exposure (winds, rain-splash zones)</label>
+      <input type="text" name="exposure">
+    </div>
+    <div class="field-group">
+      <label>Freezing/drainage issues</label>
+      <input type="text" name="freezeDrain">
+    </div>
+    <div class="field-group">
+      <label>Nearby obstructions</label>
+      <input type="text" name="obstructions">
+    </div>
+  </div>
+
+  <!-- 9. Utilities & Accessories -->
+  <div class="section">
+    <h2>9. Utilities & Accessories</h2>
+    <div class="field-group">
+      <label>Dock plates/boards condition</label>
+      <input type="text" name="dockPlates">
+      <label>Photo</label>
+      <video id="dockPlatesVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="dockPlates">Capture</button>
+      <canvas id="dockPlatesCanvas" style="display:none;"></canvas>
+      <img id="dockPlatesPreview" class="photo-preview">
+      <input type="hidden" name="dockPlatesData" id="dockPlatesData">
+    </div>
+    <div class="field-group">
+      <label>Scissor/dock lifts presence & capacity</label>
+      <input type="text" name="scissorLifts">
+      <label>Photo</label>
+      <video id="scissorVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="scissor">Capture</button>
+      <canvas id="scissorCanvas" style="display:none;"></canvas>
+      <img id="scissorPreview" class="photo-preview">
+      <input type="hidden" name="scissorData" id="scissorData">
+    </div>
+    <div class="field-group">
+      <label>Air lines / electrical outlets condition</label>
+      <input type="text" name="airLines">
+      <label>Photo</label>
+      <video id="airLinesVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="airLines">Capture</button>
+      <canvas id="airLinesCanvas" style="display:none;"></canvas>
+      <img id="airLinesPreview" class="photo-preview">
+      <input type="hidden" name="airLinesData" id="airLinesData">
+    </div>
+    <div class="field-group">
+      <label>Trailer restraint light package functionality</label>
+      <input type="text" name="restraintLights">
+      <label>Photo</label>
+      <video id="restraintVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="restraint">Capture</button>
+      <canvas id="restraintCanvas" style="display:none;"></canvas>
+      <img id="restraintPreview" class="photo-preview">
+      <input type="hidden" name="restraintData" id="restraintData">
+    </div>
+  </div>
+
+  <!-- 10. Notes & Recommendations -->
+  <div class="section">
+    <h2>10. Notes & Recommendations</h2>
+    <div class="field-group">
+      <label>Additional observations/anomalies</label>
+      <textarea name="notes" rows="3"></textarea>
+      <label>Prelim. Repair vs Replace</label>
+      <textarea name="recommendations" rows="2"></textarea>
+      <label>Photo</label>
+      <video id="notesVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="notes">Capture</button>
+      <canvas id="notesCanvas" style="display:none;"></canvas>
+      <img id="notesPreview" class="photo-preview">
+      <input type="hidden" name="notesData" id="notesData">
+    </div>
+  </div>
+
+  <!-- 11. Additional Notes & Add‑Ons -->
+  <div class="section">
+    <h2>11. Additional Notes & Add‑Ons</h2>
+    <div class="field-group">
+      <textarea name="extraNotes" rows="4" placeholder="Enter any additional comments or observations"></textarea>
+      <label>Photo</label>
+      <video id="extraVideo" autoplay playsinline></video>
+      <button type="button" class="capture" data-target="extra">Capture</button>
+      <canvas id="extraCanvas" style="display:none;"></canvas>
+      <img id="extraPreview" class="photo-preview">
+      <input type="hidden" name="extraData" id="extraData">
+    </div>
+  </div>
+
+  <button type="button" class="generate" id="generatePdf">Generate PDF</button>
+</form>
+
+
+<script>
+  // Initialize all cameras
+  document.querySelectorAll('button.capture').forEach(btn => {
+    const target = btn.dataset.target;
+    const video = document.getElementById(target + 'Video');
+    const canvas = document.getElementById(target + 'Canvas');
+    const preview = document.getElementById(target + 'Preview');
+    const hidden = document.getElementById(target + 'Data');
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment'} })
+      .then(stream => { video.srcObject = stream; })
+      .catch(console.error);
+
+    btn.addEventListener('click', () => {
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext('2d').drawImage(video,0,0);
+      const dataUrl = canvas.toDataURL('image/jpeg');
+      preview.src = dataUrl;
+      hidden.value = dataUrl;
     });
-    document.getElementById('generatePdf').addEventListener('click', async () => {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF({ unit: 'px', format: 'a4' });
-      const form = document.getElementById('surveyForm');
-      const canvas = await html2canvas(form);
-      const imgData = canvas.toDataURL('image/png');
-      const pdfWidth = doc.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      const imgProps = doc.getImageProperties(imgData);
-const imgWidth = pdfWidth;
-const imgHeight = (imgProps.height * imgWidth) / imgProps.width;
-let heightLeft = imgHeight;
-let position = 0;
+  });
 
-// Add first page
-doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-heightLeft -= doc.internal.pageSize.getHeight();
+  // Generate multi-page PDF
+  document.getElementById('generatePdf').addEventListener('click', async () => {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit:'px', format:'a4' });
+    const form = document.getElementById('surveyForm');
+    const canvas = await html2canvas(form);
+    const imgData = canvas.toDataURL('image/png');
+    const pdfWidth = doc.internal.pageSize.getWidth();
+    const imgProps = doc.getImageProperties(imgData);
+    const imgHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    let heightLeft = imgHeight;
+    let position = 0;
 
-// Add remaining pages if needed
-while (heightLeft > 0) {
-  position = heightLeft - imgHeight;
-  doc.addPage();
-  doc.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-  heightLeft -= doc.internal.pageSize.getHeight();
-}
+    doc.addImage(imgData,'PNG',0,position,pdfWidth,imgHeight);
+    heightLeft -= doc.internal.pageSize.getHeight();
 
-doc.save('DockSurvey.pdf');
-    });
-  </script>
+    while(heightLeft>0) {
+      position = heightLeft - imgHeight;
+      doc.addPage();
+      doc.addImage(imgData,'PNG',0,position,pdfWidth,imgHeight);
+      heightLeft -= doc.internal.pageSize.getHeight();
+    }
+
+    doc.save('DockSurvey.pdf');
+  });
+</script>
 </body>
 </html>
